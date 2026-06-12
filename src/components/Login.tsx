@@ -8,13 +8,20 @@ interface LoginProps {
 }
 
 export default function Login({ onLoginSuccess, users }: LoginProps) {
-  const [selectedEmail, setSelectedEmail] = useState("admin@vetiva.com");
+  const [selectedEmail, setSelectedEmail] = useState("admin@corporate.com");
   const [password, setPassword] = useState("••••••••••••");
   const [isEntraMode, setIsEntraMode] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
   const [mfaStep, setMfaStep] = useState(false);
   const [authError, setAuthError] = useState("");
   const [logoFailed, setLogoFailed] = useState(false);
+
+  // Sync selection when user list gets loaded
+  React.useEffect(() => {
+    if (users.length > 0 && !users.some(u => u.email === selectedEmail)) {
+      setSelectedEmail(users[0].email);
+    }
+  }, [users, selectedEmail]);
 
   const handleStandardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,7 +235,7 @@ export default function Login({ onLoginSuccess, users }: LoginProps) {
         <div className="mt-8 pt-4 border-t border-slate-800 text-center">
           <p className="text-[11px] text-slate-500 flex items-center justify-center gap-1">
             <CheckCircle2 size={12} className="text-emerald-500" />
-            Vetiva Audited Workspace environment.
+            Audited Secure Workspace environment.
           </p>
         </div>
       </div>

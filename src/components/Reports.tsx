@@ -87,7 +87,7 @@ export default function Reports({ state }: ReportsProps) {
     }
 
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += `Vetiva Capital Management IT Support Report,${selectedReportType}\r\n`;
+    csvContent += `Corporate Management IT Support Report,${selectedReportType}\r\n`;
     csvContent += `Generated Reference Code,${compiledPreview.referenceCode}\r\n`;
     csvContent += `Execution Date,${compiledPreview.compiledOn}\r\n\r\n`;
     csvContent += "Operational Metric Parameter,Current Monitored Count\r\n";
@@ -102,7 +102,7 @@ export default function Reports({ state }: ReportsProps) {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Vetiva_IT_Support_${selectedReportType.replace(/ /g, "_")}.csv`);
+    link.setAttribute("download", `Corporate_IT_Support_${selectedReportType.replace(/ /g, "_")}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -123,7 +123,7 @@ export default function Reports({ state }: ReportsProps) {
       alert("No compiled database metrics to share.");
       return;
     }
-    const email = prompt("Enter target corporate address for secure audit distribution:", "management@vetiva.com");
+    const email = prompt("Enter target corporate address for secure audit distribution:", "management@corporate.com");
     if (email) {
       alert(`Dispatch Approved: Compiled audit summary for "${selectedReportType}" successfully shared to ${email} with digital security keys.`);
     }
@@ -312,7 +312,7 @@ export default function Reports({ state }: ReportsProps) {
                     <p className="text-[10px] text-slate-500">Lead Support Specialist Signature</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-slate-800">Vetiva IT Directorate</p>
+                    <p className="font-bold text-slate-800">IT Directorate</p>
                     <p className="text-[10px] text-slate-500">Authentication stamp lock</p>
                   </div>
                 </div>

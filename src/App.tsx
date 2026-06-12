@@ -35,7 +35,15 @@ import {
 const getInitialState = <T,>(key: string, fallback: T): T => {
   try {
     const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
+    if (!saved) return fallback;
+    const parsed = JSON.parse(saved);
+    if (parsed === null || parsed === undefined) {
+      return fallback;
+    }
+    if (Array.isArray(parsed) && parsed.length === 0) {
+      return fallback;
+    }
+    return parsed;
   } catch {
     return fallback;
   }
@@ -74,7 +82,14 @@ export default function App() {
       ];
       
       const responses = await Promise.all(endpoints.map(ep => fetch(ep)));
-      const data = await Promise.all(responses.map(res => res.json()));
+      const data = await Promise.all(responses.map(async res => {
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          return res.json();
+        }
+        throw new Error("Response is not JSON");
+      }));
 
       setTickets(data[0]);
       setMaintenanceRecords(data[1]);
@@ -112,12 +127,21 @@ export default function App() {
   // Load users directory on mount for authentication
   useEffect(() => {
     fetch("/api/users")
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("HTTP Status " + res.status);
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          return res.json();
+        }
+        throw new Error("Response is not JSON");
+      })
       .then(data => {
-        setUsers(data);
-        try {
-          localStorage.setItem("vetiva_users", JSON.stringify(data));
-        } catch {}
+        if (Array.isArray(data) && data.length > 0) {
+          setUsers(data);
+          try {
+            localStorage.setItem("vetiva_users", JSON.stringify(data));
+          } catch {}
+        }
       })
       .catch(err => console.warn("Executing under offline browser routing:", err));
   }, []);
@@ -626,7 +650,7 @@ export default function App() {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-400">
           <Loader2 className="w-8 h-8 text-[#C4A052] animate-spin mb-4" />
-          <span className="text-xs font-mono">Synchronizing Vetiva Infrastructure Logs...</span>
+          <span className="text-xs font-mono">Synchronizing IT Infrastructure Logs...</span>
         </div>
       );
     }

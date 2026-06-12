@@ -333,7 +333,7 @@ export default function Assets({
         <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4">
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 max-w-sm text-center relative shadow-2xl animate-fade-in">
             <button onClick={() => setQrCodePathModal("")} className="absolute top-3 right-3 text-slate-550 hover:text-white cursor-pointer hover:underline">✕</button>
-            <h3 className="text-white text-xs font-bold uppercase tracking-widest text-[#C4A052] mb-1">VETIVA Hardware Token</h3>
+            <h3 className="text-white text-xs font-bold uppercase tracking-widest text-[#C4A052] mb-1">Corporate Hardware Token</h3>
             <p className="text-[10px] text-slate-400 mb-4 font-semibold tracking-wider">{selectedAsset?.tag}</p>
             
             {/* Direct dynamic SVG QR path on backend */}

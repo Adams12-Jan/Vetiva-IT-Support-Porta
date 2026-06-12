@@ -17,7 +17,7 @@ export const FALLBACK_USERS: User[] = [
   {
     id: "u-1",
     name: "Support Admin",
-    email: "admin@vetiva.com",
+    email: "admin@corporate.com",
     role: UserRole.IT_ADMIN,
     department: "Administration",
     isMfaEnabled: true
@@ -25,7 +25,7 @@ export const FALLBACK_USERS: User[] = [
   {
     id: "u-2",
     name: "Samuel Awodele",
-    email: "samuel.awodele@vetiva.com",
+    email: "samuel.awodele@corporate.com",
     role: UserRole.IT_SUPPORT,
     department: "Administration",
     isMfaEnabled: true
@@ -33,7 +33,7 @@ export const FALLBACK_USERS: User[] = [
   {
     id: "u-3",
     name: "Chioma Okafor",
-    email: "chioma.okafor@vetiva.com",
+    email: "chioma.okafor@corporate.com",
     role: UserRole.STAFF,
     department: "Asset Management",
     isMfaEnabled: false
@@ -41,7 +41,7 @@ export const FALLBACK_USERS: User[] = [
   {
     id: "u-4",
     name: "Folayan Alabi",
-    email: "folayan.alabi@vetiva.com",
+    email: "folayan.alabi@corporate.com",
     role: UserRole.MANAGEMENT,
     department: "Investment Banking",
     isMfaEnabled: true
@@ -49,7 +49,7 @@ export const FALLBACK_USERS: User[] = [
   {
     id: "u-5",
     name: "Root Administrator",
-    email: "sysadmin@vetiva.com",
+    email: "sysadmin@corporate.com",
     role: UserRole.SYS_ADMIN,
     department: "Corporate Services",
     isMfaEnabled: true
@@ -311,7 +311,7 @@ export const FALLBACK_ARTICLES: KbArticle[] = [
     id: "KB-501",
     title: "Troubleshooting Bloomberg Terminal Feed Lag",
     category: "Market Data Connectivity",
-    content: "If the real-time tick price stream freezes or displays 'Feed Connection Timed Out', execute these diagnostic steps:\n\n1. Search for 'Bloomberg Terminal API Diagnostic' in your Windows Taskbar and run the script as Administrator.\n2. Confirm that TCP ports 8194 and 8196 are listing as ESTABLISHED in the terminal diagnostics log.\n3. Clear the bloomberg registry and cache path using command: C:\\blp\\API\\bin\\bbgcache.exe -reset\n4. If the error continues, ping core router address 192.168.10.1 and report the average delay to Vetiva IT support.",
+    content: "If the real-time tick price stream freezes or displays 'Feed Connection Timed Out', execute these diagnostic steps:\n\n1. Search for 'Bloomberg Terminal API Diagnostic' in your Windows Taskbar and run the script as Administrator.\n2. Confirm that TCP ports 8194 and 8196 are listing as ESTABLISHED in the terminal diagnostics log.\n3. Clear the bloomberg registry and cache path using command: C:\\blp\\API\\bin\\bbgcache.exe -reset\n4. If the error continues, ping core router address 192.168.10.1 and report the average delay to the IT support desk.",
     views: 124,
     upvotes: 28,
     lastUpdated: "2026-03-30",

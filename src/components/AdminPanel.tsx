@@ -162,7 +162,7 @@ export default function AdminPanel({
             </h3>
             
             <p className="text-[11px] text-slate-400 text-left leading-normal">
-              Unified Single Sign-On (SSO) links the portal with Vetiva Capital's global tenant account directory. Run manual syncs to refresh authorization credentials.
+              Unified Single Sign-On (SSO) links the portal with the secure corporate global tenant account directory. Run manual syncs to refresh authorization credentials.
             </p>
 
             <div className="p-3 bg-slate-900 border border-slate-850 rounded text-left">
