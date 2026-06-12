@@ -117,7 +117,7 @@ export default function Dashboard({
         <div>
           <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2 font-sans tracking-tight">
             <Building className="text-[#C4A052]" size={22} />
-            Vetiva IT Support Command Dashboard
+            IT Support Command Dashboard
           </h1>
           <p className="text-xs text-slate-400 mt-1">
             Real-time analytics monitor for critical transaction infrastructure systems &amp; support compliance.

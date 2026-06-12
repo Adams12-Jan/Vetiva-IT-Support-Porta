@@ -208,7 +208,12 @@ export default function Reports({ state }: ReportsProps) {
               {/* Report Header Logo */}
               <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4 text-left">
                 <div>
-                  <h2 className="text-lg font-black tracking-widest text-[#0B1E36]">VETIVA CAPITAL</h2>
+                  <img 
+                    src="https://imgur.com/r53TTWv.png" 
+                    alt="Logo" 
+                    className="h-10 object-contain mb-1.5" 
+                    referrerPolicy="no-referrer"
+                  />
                   <p className="text-[10px] font-bold tracking-widest text-amber-600 uppercase mt-0.5">IT Infrastructure &amp; Security Division</p>
                   <p className="text-[9px] text-slate-500">HQ Desk: Floor 2-4, Plot 12, Lagos Marina, NGA</p>
                 </div>
