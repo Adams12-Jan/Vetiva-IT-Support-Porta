@@ -1,0 +1,6 @@
+{
+  "name": "Vetiva IT Support Portal",
+  "description": "IT Support System Maintenance Records & Reporting Portal for Vetiva Capital Management Limited.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
