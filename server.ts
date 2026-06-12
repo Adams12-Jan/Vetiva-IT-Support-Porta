@@ -57,11 +57,11 @@ const DATA_STORE_PATH = path.join(process.cwd(), "data_store.json");
 // Default seeded database state for Vetiva Capital Management Limited
 const INITIAL_DATABASE_STATE = {
   users: [
-    { id: "u-1", name: "Support Admin", email: "admin@vetiva.com", role: UserRole.IT_ADMIN, department: "Administration", isMfaEnabled: true },
-    { id: "u-2", name: "Samuel Awodele", email: "samuel.awodele@vetiva.com", role: UserRole.IT_SUPPORT, department: "Administration", isMfaEnabled: true },
-    { id: "u-3", name: "Chioma Okafor", email: "chioma.okafor@vetiva.com", role: UserRole.STAFF, department: "Asset Management", isMfaEnabled: false },
-    { id: "u-4", name: "Folayan Alabi", email: "folayan.alabi@vetiva.com", role: UserRole.MANAGEMENT, department: "Investment Banking", isMfaEnabled: true },
-    { id: "u-5", name: "Root Administrator", email: "sysadmin@vetiva.com", role: UserRole.SYS_ADMIN, department: "Corporate Services", isMfaEnabled: true }
+    { id: "u-1", name: "Support Admin", email: "admin@corporate.com", role: UserRole.IT_ADMIN, department: "Administration", isMfaEnabled: true },
+    { id: "u-2", name: "Samuel Awodele", email: "samuel.awodele@corporate.com", role: UserRole.IT_SUPPORT, department: "Administration", isMfaEnabled: true },
+    { id: "u-3", name: "Chioma Okafor", email: "chioma.okafor@corporate.com", role: UserRole.STAFF, department: "Asset Management", isMfaEnabled: false },
+    { id: "u-4", name: "Folayan Alabi", email: "folayan.alabi@corporate.com", role: UserRole.MANAGEMENT, department: "Investment Banking", isMfaEnabled: true },
+    { id: "u-5", name: "Root Administrator", email: "sysadmin@corporate.com", role: UserRole.SYS_ADMIN, department: "Corporate Services", isMfaEnabled: true }
   ] as User[],
 
   tickets: [
@@ -182,7 +182,8 @@ const INITIAL_DATABASE_STATE = {
         { id: "h-1", type: "RAM Upgrade", description: "Expanded ECC Memory from 64GB to 128GB to support increased virtualization load.", date: "2025-08-12", by: "Samuel Awodele" },
         { id: "h-2", type: "Preventive Care", description: "Checked thermal paste flow and cleared fan channels.", date: "2026-05-10", by: "Samuel Awodele" }
       ],
-      qrCodeDataUrl: "https://ais-dev-svhx3epbtbaf6ov6uiss4g-92315164727.europe-west1.run.app/qr/AST-301"
+      qrCodeDataUrl: "https://ais-dev-svhx3epbtbaf6ov6uiss4g-92315164727.europe-west1.run.app/qr/AST-301",
+      quantity: 4
     },
     {
       id: "AST-302",
@@ -197,9 +198,10 @@ const INITIAL_DATABASE_STATE = {
       location: "Executive Offices Floor 4",
       lastMaintenanceDate: "2026-04-18",
       serviceHistory: [
-        { id: "h-3", type: "Re-imaging OS", description: "Applied custom Vetiva corporate security image with integrated Entra ID and Bitlocker controls.", date: "2026-04-18", by: "Samuel Awodele" }
+        { id: "h-3", type: "Re-imaging OS", description: "Applied custom corporate security image with integrated Entra ID and Bitlocker controls.", date: "2026-04-18", by: "Samuel Awodele" }
       ],
-      qrCodeDataUrl: "https://ais-dev-svhx3epbtbaf6ov6uiss4g-92315164727.europe-west1.run.app/qr/AST-302"
+      qrCodeDataUrl: "https://ais-dev-svhx3epbtbaf6ov6uiss4g-92315164727.europe-west1.run.app/qr/AST-302",
+      quantity: 15
     },
     {
       id: "AST-303",
@@ -216,7 +218,8 @@ const INITIAL_DATABASE_STATE = {
       serviceHistory: [
         { id: "h-4", type: "Port Audit", description: "Reset VLAN configurations on Ports 12-18 due to staff re-shuffling.", date: "2026-01-14", by: "Samuel Awodele" }
       ],
-      qrCodeDataUrl: "https://ais-dev-svhx3epbtbaf6ov6uiss4g-92315164727.europe-west1.run.app/qr/AST-303"
+      qrCodeDataUrl: "https://ais-dev-svhx3epbtbaf6ov6uiss4g-92315164727.europe-west1.run.app/qr/AST-303",
+      quantity: 6
     },
     {
       id: "AST-304",
@@ -233,7 +236,8 @@ const INITIAL_DATABASE_STATE = {
       serviceHistory: [
         { id: "h-5", type: "Battery swap", description: "Replaced 4 modular cells after standard cyclic discharge testing.", date: "2025-10-02", by: "Samuel Awodele" }
       ],
-      qrCodeDataUrl: "https://ais-dev-svhx3epbtbaf6ov6uiss4g-92315164727.europe-west1.run.app/qr/AST-304"
+      qrCodeDataUrl: "https://ais-dev-svhx3epbtbaf6ov6uiss4g-92315164727.europe-west1.run.app/qr/AST-304",
+      quantity: 2
     }
   ] as Asset[],
 
@@ -325,7 +329,29 @@ function loadDatabaseState() {
   if (fs.existsSync(DATA_STORE_PATH)) {
     try {
       const content = fs.readFileSync(DATA_STORE_PATH, "utf-8");
-      return JSON.parse(content);
+      const parsed = JSON.parse(content);
+      
+      // Auto-sanitize loaded user emails to @corporate.com
+      if (parsed && Array.isArray(parsed.users)) {
+        parsed.users = parsed.users.map((u: any) => {
+          if (u.email && u.email.endsWith("@vetiva.com")) {
+            u.email = u.email.replace("@vetiva.com", "@corporate.com");
+          }
+          return u;
+        });
+      }
+      
+      // Auto-ensure assets have a quantity field
+      if (parsed && Array.isArray(parsed.assets)) {
+        parsed.assets = parsed.assets.map((a: any) => {
+          if (typeof a.quantity !== "number") {
+            a.quantity = a.id === "AST-302" ? 15 : (a.id === "AST-303" ? 6 : (a.id === "AST-304" ? 2 : 4));
+          }
+          return a;
+        });
+      }
+
+      return parsed;
     } catch (e) {
       console.error("Error reading database store. Falling back to default seeded data.", e);
       return INITIAL_DATABASE_STATE;
@@ -867,7 +893,7 @@ app.post("/api/maintenance/schedule", (req, res) => {
 
 // Create Asset
 app.post("/api/assets", (req, res) => {
-  const { name, tag, category, purchaseDate, warrantyExpiry, cost, assignedTo, location, healthStatus, userId, userName, userRole } = req.body;
+  const { name, tag, category, purchaseDate, warrantyExpiry, cost, assignedTo, location, healthStatus, quantity, userId, userName, userRole } = req.body;
 
   if (!name || !tag || !category || !purchaseDate) {
     return res.status(400).json({ error: "Missing required asset specifications." });
@@ -884,7 +910,8 @@ app.post("/api/assets", (req, res) => {
     healthStatus: (healthStatus || "Optimal") as "Optimal" | "Degraded" | "Critical",
     assignedTo: assignedTo || "Unassigned",
     location: location || "HQ IT Office",
-    serviceHistory: []
+    serviceHistory: [],
+    quantity: Number(quantity !== undefined ? quantity : 1)
   };
 
   // Attach beautiful simulated QR Code path using app development/production host IP
@@ -899,10 +926,60 @@ app.post("/api/assets", (req, res) => {
     userName || "System",
     userRole || "IT Administrator",
     "Asset Registered",
-    `Registered new asset tag ${tag}: "${name}"`
+    `Registered new asset tag ${tag}: "${name}" with stock quantity ${newAsset.quantity}`
   );
 
   res.status(201).json(newAsset);
+});
+
+// Delete/Remove Asset
+app.delete("/api/assets/:id", (req, res) => {
+  const { id } = req.params;
+  const { userId, userName, userRole } = req.query;
+
+  const assetIndex = db.assets.findIndex((a: Asset) => a.id === id);
+  if (assetIndex === -1) {
+    return res.status(404).json({ error: "Asset not found" });
+  }
+
+  const asset = db.assets[assetIndex];
+  db.assets.splice(assetIndex, 1);
+  saveDatabaseState(db);
+
+  writeAuditLog(
+    (userId as string) || "u-sys",
+    (userName as string) || "System",
+    (userRole as string) || "IT Administrator",
+    "Asset Removed",
+    `Removed IT Asset from registry: Tag ${asset.tag}, Name "${asset.name}" (was quantity ${asset.quantity || 1})`
+  );
+
+  res.status(200).json({ success: true, id });
+});
+
+// Update Asset Quantity/Stock
+app.post("/api/assets/:id/quantity", (req, res) => {
+  const { id } = req.params;
+  const { quantity, userId, userName, userRole } = req.body;
+
+  const asset = db.assets.find((a: Asset) => a.id === id);
+  if (!asset) {
+    return res.status(404).json({ error: "Asset not found" });
+  }
+
+  const oldQty = asset.quantity || 0;
+  asset.quantity = Number(quantity);
+  saveDatabaseState(db);
+
+  writeAuditLog(
+    userId || "u-sys",
+    userName || "System",
+    userRole || "IT Administrator",
+    "Asset Stock Updated",
+    `Updated stock quantity of asset tag ${asset.tag}: "${asset.name}" from ${oldQty} to ${asset.quantity}`
+  );
+
+  res.status(200).json(asset);
 });
 
 // Update Asset service history/health

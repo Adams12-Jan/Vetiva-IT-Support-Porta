@@ -2,13 +2,55 @@ import React, { useState } from "react";
 import { Shield, Key, Sparkles, Building, ChevronRight, CheckCircle2 } from "lucide-react";
 import { User, UserRole } from "../types";
 
+const LOCAL_FALLBACK_USERS: User[] = [
+  {
+    id: "u-1",
+    name: "Support Admin",
+    email: "admin@corporate.com",
+    role: UserRole.IT_ADMIN,
+    department: "Administration",
+    isMfaEnabled: true
+  },
+  {
+    id: "u-2",
+    name: "Samuel Awodele",
+    email: "samuel.awodele@corporate.com",
+    role: UserRole.IT_SUPPORT,
+    department: "Administration",
+    isMfaEnabled: true
+  },
+  {
+    id: "u-3",
+    name: "Chioma Okafor",
+    email: "chioma.okafor@corporate.com",
+    role: UserRole.STAFF,
+    department: "Asset Management",
+    isMfaEnabled: false
+  },
+  {
+    id: "u-4",
+    name: "Folayan Alabi",
+    email: "folayan.alabi@corporate.com",
+    role: UserRole.MANAGEMENT,
+    department: "Investment Banking",
+    isMfaEnabled: true
+  },
+  {
+    id: "u-5",
+    name: "Root Administrator",
+    email: "sysadmin@corporate.com",
+    role: UserRole.SYS_ADMIN,
+    department: "Corporate Services",
+    isMfaEnabled: true
+  }
+];
+
 interface LoginProps {
   onLoginSuccess: (user: User) => void;
   users: User[];
 }
 
 export default function Login({ onLoginSuccess, users }: LoginProps) {
-  const [selectedEmail, setSelectedEmail] = useState("admin@corporate.com");
   const [password, setPassword] = useState("••••••••••••");
   const [isEntraMode, setIsEntraMode] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
@@ -16,18 +58,21 @@ export default function Login({ onLoginSuccess, users }: LoginProps) {
   const [authError, setAuthError] = useState("");
   const [logoFailed, setLogoFailed] = useState(false);
 
+  const displayUsers = users && users.length > 0 ? users : LOCAL_FALLBACK_USERS;
+  const [selectedEmail, setSelectedEmail] = useState("admin@corporate.com");
+
   // Sync selection when user list gets loaded
   React.useEffect(() => {
-    if (users.length > 0 && !users.some(u => u.email === selectedEmail)) {
-      setSelectedEmail(users[0].email);
+    if (displayUsers.length > 0 && !displayUsers.some(u => u.email === selectedEmail)) {
+      setSelectedEmail(displayUsers[0].email);
     }
-  }, [users, selectedEmail]);
+  }, [displayUsers, selectedEmail]);
 
   const handleStandardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
     
-    const matchedUser = users.find(u => u.email === selectedEmail);
+    const matchedUser = displayUsers.find(u => u.email === selectedEmail);
     if (!matchedUser) {
       setAuthError("Invalid corporate credentials");
       return;
@@ -43,7 +88,7 @@ export default function Login({ onLoginSuccess, users }: LoginProps) {
   const handleMfaSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (mfaCode === "123456" || mfaCode.length === 6) {
-      const matchedUser = users.find(u => u.email === selectedEmail);
+      const matchedUser = displayUsers.find(u => u.email === selectedEmail);
       if (matchedUser) {
         onLoginSuccess(matchedUser);
       }
@@ -57,7 +102,7 @@ export default function Login({ onLoginSuccess, users }: LoginProps) {
     setAuthError("");
     setTimeout(() => {
       // Simulate Microsoft Directory lookup
-      const matches = users.find(u => u.email === selectedEmail);
+      const matches = displayUsers.find(u => u.email === selectedEmail);
       setIsEntraMode(false);
       if (matches) {
         if (matches.isMfaEnabled) {
@@ -86,7 +131,7 @@ export default function Login({ onLoginSuccess, users }: LoginProps) {
             {!logoFailed ? (
               <img 
                 src="https://imgur.com/r53TTWv.png" 
-                alt="Vetiva Logo" 
+                alt="Logo" 
                 className="h-14 object-contain" 
                 referrerPolicy="no-referrer"
                 onError={() => {
@@ -95,7 +140,7 @@ export default function Login({ onLoginSuccess, users }: LoginProps) {
               />
             ) : (
               /* Minimal fallback label when image fails to load */
-              <h1 className="text-xl tracking-widest text-[#C4A052] font-semibold mt-1">V E T I V A</h1>
+              <h1 className="text-xl tracking-widest text-[#C4A052] font-semibold mt-1">C O R P O R A T E</h1>
             )}
           </div>
           <h2 className="text-white font-medium text-lg tracking-tight">IT Support &amp; Maintenance Portal</h2>
@@ -116,10 +161,10 @@ export default function Login({ onLoginSuccess, users }: LoginProps) {
                 <select
                   value={selectedEmail}
                   onChange={(e) => setSelectedEmail(e.target.value)}
-                  className="w-full text-sm bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-3.5 text-slate-100 focus:outline-none focus:border-amber-500"
+                  className="w-full text-sm bg-slate-900 border border-slate-700 rounded-lg py-2.5 px-3.5 text-slate-100 focus:outline-none focus:border-amber-500 cursor-pointer"
                   id="user-select"
                 >
-                  {users.map((u) => (
+                  {displayUsers.map((u) => (
                     <option key={u.id} value={u.email}>
                       {u.name} ({u.role})
                     </option>

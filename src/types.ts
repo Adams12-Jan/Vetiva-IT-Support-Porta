@@ -126,6 +126,7 @@ export interface Asset {
   lastMaintenanceDate?: string;
   serviceHistory: ServiceHistoryItem[];
   qrCodeDataUrl?: string;
+  quantity: number;
 }
 
 export interface Incident {

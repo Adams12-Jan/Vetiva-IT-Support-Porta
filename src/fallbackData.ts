@@ -204,7 +204,8 @@ export const FALLBACK_ASSETS: Asset[] = [
         by: "Samuel Awodele"
       }
     ],
-    qrCodeDataUrl: ""
+    qrCodeDataUrl: "",
+    quantity: 4
   },
   {
     id: "AST-302",
@@ -227,7 +228,8 @@ export const FALLBACK_ASSETS: Asset[] = [
         by: "Samuel Awodele"
       }
     ],
-    qrCodeDataUrl: ""
+    qrCodeDataUrl: "",
+    quantity: 15
   },
   {
     id: "AST-303",
@@ -250,7 +252,8 @@ export const FALLBACK_ASSETS: Asset[] = [
         by: "Samuel Awodele"
       }
     ],
-    qrCodeDataUrl: ""
+    qrCodeDataUrl: "",
+    quantity: 6
   },
   {
     id: "AST-304",
@@ -273,7 +276,8 @@ export const FALLBACK_ASSETS: Asset[] = [
         by: "Samuel Awodele"
       }
     ],
-    qrCodeDataUrl: ""
+    qrCodeDataUrl: "",
+    quantity: 2
   }
 ];
 

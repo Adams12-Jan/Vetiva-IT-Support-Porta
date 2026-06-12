@@ -66,6 +66,67 @@ export default function App() {
   // Loading indicator states
   const [isDataLoading, setIsDataLoading] = useState(false);
 
+  // Sanitize data domains on boot (migrates local storage from @vetiva.com to @corporate.com)
+  useEffect(() => {
+    // 1. Sanitize local storage users
+    const localUsers = localStorage.getItem("vetiva_users");
+    if (localUsers) {
+      try {
+        const parsed = JSON.parse(localUsers);
+        if (Array.isArray(parsed)) {
+          const sanitized = parsed.map(u => {
+            if (u.email && u.email.endsWith("@vetiva.com")) {
+              return { ...u, email: u.email.replace("@vetiva.com", "@corporate.com") };
+            }
+            return u;
+          });
+          localStorage.setItem("vetiva_users", JSON.stringify(sanitized));
+          setUsers(sanitized);
+        }
+      } catch (err) {
+        console.warn("Error migrating cached users", err);
+      }
+    }
+
+    // 2. Clear any stale currentUser session referencing vetiva or update it
+    const sessionUser = localStorage.getItem("vetiva_session_user");
+    if (sessionUser) {
+      try {
+        const parsed = JSON.parse(sessionUser);
+        if (parsed && parsed.email && parsed.email.endsWith("@vetiva.com")) {
+          const sanitizedEmail = parsed.email.replace("@vetiva.com", "@corporate.com");
+          const updatedUser = { ...parsed, email: sanitizedEmail };
+          localStorage.setItem("vetiva_session_user", JSON.stringify(updatedUser));
+          setCurrentUser(updatedUser);
+        } else if (parsed) {
+          setCurrentUser(parsed);
+        }
+      } catch {
+        localStorage.removeItem("vetiva_session_user");
+      }
+    }
+
+    // 3. Ensure assets have quantity defined in cached state
+    const localAssets = localStorage.getItem("vetiva_assets");
+    if (localAssets) {
+      try {
+        const parsed = JSON.parse(localAssets);
+        if (Array.isArray(parsed)) {
+          const sanitized = parsed.map(a => {
+            if (typeof a.quantity !== "number") {
+              return { ...a, quantity: a.id === "AST-302" ? 15 : (a.id === "AST-303" ? 6 : (a.id === "AST-304" ? 2 : 4)) };
+            }
+            return a;
+          });
+          localStorage.setItem("vetiva_assets", JSON.stringify(sanitized));
+          setAssets(sanitized);
+        }
+      } catch (err) {
+        console.warn("Error migrating cached assets", err);
+      }
+    }
+  }, []);
+
   // Read whole operational state from express API
   const fetchAllData = async () => {
     setIsDataLoading(true);
@@ -387,7 +448,12 @@ export default function App() {
       const response = await fetch("/api/assets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(assetData)
+        body: JSON.stringify({
+          ...assetData,
+          userId: currentUser?.id,
+          userName: currentUser?.name,
+          userRole: currentUser?.role
+        })
       });
       if (response.ok) {
         succeeded = true;
@@ -410,9 +476,62 @@ export default function App() {
         location: assetData.location,
         lastMaintenanceDate: "",
         serviceHistory: [],
-        qrCodeDataUrl: ""
+        qrCodeDataUrl: "",
+        quantity: Number(assetData.quantity !== undefined ? assetData.quantity : 1)
       };
       const updated = [newAsset, ...assets];
+      setAssets(updated);
+      localStorage.setItem("vetiva_assets", JSON.stringify(updated));
+    }
+  };
+
+  const handleDeleteAsset = async (id: string) => {
+    let succeeded = false;
+    try {
+      const response = await fetch(`/api/assets/${id}?userId=${currentUser?.id || ''}&userName=${encodeURIComponent(currentUser?.name || '')}&userRole=${encodeURIComponent(currentUser?.role || '')}`, {
+        method: "DELETE"
+      });
+      if (response.ok) {
+        succeeded = true;
+        await fetchAllData();
+      }
+    } catch (err) {
+      console.warn("REST offline fallback enabled", err);
+    }
+    if (!succeeded) {
+      const updated = assets.filter(a => a.id !== id);
+      setAssets(updated);
+      localStorage.setItem("vetiva_assets", JSON.stringify(updated));
+    }
+  };
+
+  const handleUpdateAssetQuantity = async (id: string, qty: number) => {
+    let succeeded = false;
+    try {
+      const response = await fetch(`/api/assets/${id}/quantity`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quantity: qty,
+          userId: currentUser?.id,
+          userName: currentUser?.name,
+          userRole: currentUser?.role
+        })
+      });
+      if (response.ok) {
+        succeeded = true;
+        await fetchAllData();
+      }
+    } catch (err) {
+      console.warn("REST offline fallback enabled", err);
+    }
+    if (!succeeded) {
+      const updated = assets.map(a => {
+        if (a.id === id) {
+          return { ...a, quantity: qty };
+        }
+        return a;
+      });
       setAssets(updated);
       localStorage.setItem("vetiva_assets", JSON.stringify(updated));
     }
@@ -696,6 +815,8 @@ export default function App() {
             currentUser={currentUser} 
             onRegisterAsset={handleRegisterAsset}
             onAddServicalLog={handleAddServicalLog}
+            onDeleteAsset={handleDeleteAsset}
+            onUpdateAssetQuantity={handleUpdateAssetQuantity}
           />
         );
       case "incidents":

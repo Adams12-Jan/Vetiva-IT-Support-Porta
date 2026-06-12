@@ -47,12 +47,12 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, onLogout
 
   return (
     <aside className="w-68 bg-slate-950 border-r border-slate-800 flex flex-col h-screen text-slate-300" id="portal-sidebar">
-      {/* Vetiva Corporate Branding Header */}
+      {/* Corporate Branding Header */}
       <div className="p-6 border-b border-slate-800 flex items-center justify-center">
         {!logoFailed ? (
           <img 
             src="https://imgur.com/r53TTWv.png" 
-            alt="Vetiva Logo" 
+            alt="Logo" 
             className="h-10 object-contain" 
             referrerPolicy="no-referrer"
             onError={() => setLogoFailed(true)}
@@ -60,10 +60,10 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, onLogout
         ) : (
           <div className="flex items-center gap-3 w-full">
             <div className="p-2 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
-              <span className="text-slate-950 font-bold font-mono text-lg">V</span>
+              <span className="text-slate-950 font-bold font-mono text-lg">C</span>
             </div>
             <div>
-              <h2 className="text-white font-bold text-sm tracking-wider uppercase">VETIVA</h2>
+              <h2 className="text-white font-bold text-sm tracking-wider uppercase">CORPORATE</h2>
               <p className="text-[9px] text-[#C4A052] font-semibold tracking-widest uppercase">IT Support Portal</p>
             </div>
           </div>

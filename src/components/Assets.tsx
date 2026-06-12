@@ -20,13 +20,17 @@ interface AssetsProps {
   currentUser: User;
   onRegisterAsset: (assetData: any) => Promise<void>;
   onAddServicalLog: (id: string, logData: any) => Promise<void>;
+  onDeleteAsset?: (id: string) => Promise<void>;
+  onUpdateAssetQuantity?: (id: string, qty: number) => Promise<void>;
 }
 
 export default function Assets({ 
   assets, 
   currentUser, 
   onRegisterAsset, 
-  onAddServicalLog 
+  onAddServicalLog,
+  onDeleteAsset,
+  onUpdateAssetQuantity
 }: AssetsProps) {
   const [filterCategory, setFilterCategory] = useState<string>("All");
   const [filterHealth, setFilterHealth] = useState<string>("All");
@@ -43,6 +47,7 @@ export default function Assets({
   const [newCost, setNewCost] = useState("");
   const [newAssigned, setNewAssigned] = useState("");
   const [newLoc, setNewLoc] = useState("");
+  const [newQuantity, setNewQuantity] = useState("1");
 
   // Service Log update states
   const [showServiceModal, setShowServiceModal] = useState(false);
@@ -89,7 +94,8 @@ export default function Assets({
       cost: newCost,
       assignedTo: newAssigned,
       location: newLoc,
-      healthStatus: "Optimal"
+      healthStatus: "Optimal",
+      quantity: Number(newQuantity) || 1
     });
 
     // Reset fields
@@ -100,6 +106,7 @@ export default function Assets({
     setNewCost("");
     setNewAssigned("");
     setNewLoc("");
+    setNewQuantity("1");
     setShowRegisterModal(false);
   };
 
@@ -198,7 +205,12 @@ export default function Assets({
                     </span>
                   </div>
 
-                  <h4 className="text-xs font-semibold text-white truncate">{a.name}</h4>
+                  <div className="flex items-center justify-between gap-1.5 min-w-0">
+                    <h4 className="text-xs font-semibold text-white truncate flex-1">{a.name}</h4>
+                    <span className="px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-slate-350 rounded text-[9px] font-mono shrink-0" title="Quantity in stock">
+                      In Stock: {a.quantity !== undefined ? a.quantity : 1}
+                    </span>
+                  </div>
                   
                   <div className="flex items-center justify-between text-[10px] text-slate-450 mt-2">
                     <span className="truncate max-w-[120px]">{a.assignedTo}</span>
@@ -244,17 +256,53 @@ export default function Assets({
               </div>
 
               {/* Bento spec layout definitions */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-930 rounded-lg border border-slate-850 text-xs text-left">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 p-4 bg-slate-930 rounded-lg border border-slate-850 text-xs text-left">
                 <div>
                   <span className="text-[10px] text-slate-500 uppercase font-semibold block">Deploy Location</span>
-                  <p className="text-slate-200 mt-0.5 font-medium">{selectedAsset.location}</p>
-                  <p className="text-[9px] text-slate-400">Owner: {selectedAsset.assignedTo}</p>
+                  <p className="text-slate-200 mt-0.5 font-medium truncate">{selectedAsset.location}</p>
+                  <p className="text-[9px] text-slate-400 truncate">Owner: {selectedAsset.assignedTo}</p>
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-500 uppercase font-semibold block">Capital Cost</span>
                   <p className="text-[#C4A052] font-mono leading-relaxed mt-0.5 text-xs font-bold">
                     ${selectedAsset.cost.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase font-semibold block">Stock level quantity</span>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="font-mono text-white text-xs font-bold bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">
+                      {selectedAsset.quantity !== undefined ? selectedAsset.quantity : 1}
+                    </span>
+                    {currentUser.role !== UserRole.STAFF && onUpdateAssetQuantity && (
+                      <div className="flex items-center border border-slate-800 rounded bg-slate-900 overflow-hidden shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const currentQty = selectedAsset.quantity !== undefined ? selectedAsset.quantity : 1;
+                            if (currentQty > 0) {
+                              onUpdateAssetQuantity(selectedAsset.id, currentQty - 1);
+                            }
+                          }}
+                          className="px-1.5 py-0.5 text-slate-400 hover:text-white hover:bg-slate-800 font-bold font-mono transition-colors border-r border-slate-850 text-[10px] cursor-pointer"
+                          title="Decrease stock level"
+                        >
+                          -
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const currentQty = selectedAsset.quantity !== undefined ? selectedAsset.quantity : 1;
+                            onUpdateAssetQuantity(selectedAsset.id, currentQty + 1);
+                          }}
+                          className="px-1.5 py-0.5 text-slate-400 hover:text-white hover:bg-slate-800 font-bold font-mono transition-colors text-[10px] cursor-pointer"
+                          title="Increase stock level"
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-500 uppercase font-semibold block">Purchase Date</span>
@@ -281,14 +329,31 @@ export default function Assets({
                 </div>
 
                 {currentUser.role !== UserRole.STAFF && (
-                  <button
-                    onClick={() => setShowServiceModal(true)}
-                    className="text-xs bg-slate-900 border border-slate-800 hover:border-slate-700 py-1.5 px-3 rounded-lg text-amber-500 cursor-pointer flex items-center gap-1.5"
-                    id="btn-trigger-service-log-modal"
-                  >
-                    <Settings size={12} />
-                    <span>Log Service Event</span>
-                  </button>
+                  <div className="flex gap-2 shrink-0">
+                    {onDeleteAsset && (
+                      <button
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to permanently remove and retire asset "${selectedAsset.name}" (${selectedAsset.tag}) from corporate stock?`)) {
+                            onDeleteAsset(selectedAsset.id);
+                            setSelectedAssetId(assets.find(a => a.id !== selectedAsset.id)?.id || null);
+                          }
+                        }}
+                        className="text-xs bg-red-955/20 border border-red-900/60 hover:bg-red-900/40 py-1.5 px-3 rounded-lg text-red-400 cursor-pointer flex items-center gap-1.5 transition-colors"
+                        id="btn-remove-asset"
+                      >
+                        <AlertTriangle size={12} />
+                        <span>Remove Asset</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowServiceModal(true)}
+                      className="text-xs bg-slate-900 border border-slate-800 hover:border-slate-700 py-1.5 px-3 rounded-lg text-amber-500 cursor-pointer flex items-center gap-1.5"
+                      id="btn-trigger-service-log-modal"
+                    >
+                      <Settings size={12} />
+                      <span>Log Service Event</span>
+                    </button>
+                  </div>
                 )}
               </div>
 
